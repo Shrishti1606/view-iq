@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 
 import { ENV } from "./lib/env.js"
+import { connectDB } from "./lib/db.js";
 
 const app = express();
 
@@ -21,7 +22,7 @@ app.get("/books", ( req, res) => {
 
 //making app ready for deployment
 
-const PORT = ENV.PORT || 3000;
+// const PORT = ENV.PORT || 3000;
 
 if (ENV.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "../frontend/dist")));
@@ -31,6 +32,15 @@ if (ENV.NODE_ENV === "production") {
     });
 }
 
-app.listen(ENV.PORT, () => {
-    console.log(`server is running on port ${PORT}`);
-});
+const startServer = async () => {
+    try{
+        await connectDB()
+        app.listen(ENV.PORT, () => {
+            console.log(`server is running on port ${ENV.PORT}`);
+        });
+    } catch(error) {
+        console.error("error starting the server", error)
+    }
+};
+
+startServer();
